@@ -1,0 +1,359 @@
+---
+title: "Zimbabwe"
+author: "Enmian Chang"
+date: "2023-10-30"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# https://rspatialdata.github.io/dhs-data.html
+
+library("rdhs")
+library("tidyr")
+library("DT")
+library("ggpubr")
+library("tidyverse")
+library("tibble")
+library("ggplot2")
+
+indicators = dhs_indicators()
+tags = dhs_tags()
+hiv_tag = tags[grepl("HIV", tags$TagName), ]
+hiv_tag
+
+```
+
+```{r}
+data_76 = dhs_data(tagIds = 76, countryIds = c("CM", "ZM"), breakdown = "subnational", surveyYearStart = 2011)
+# displaying the first 5 outputs for Zimbabwe and India in the year 2015 for HIV attitudes
+data_76 %>% datatable(options = list(
+  deferRender = TRUE,
+  scrollY = 350,
+  scrollX = 350,
+  dom = "t",
+  scroller = TRUE,
+  fixedColumns = list(leftColumns = 3, rightColumns = 0)
+))
+  
+
+# number of households with women who know where to get an HIV test
+resp <- dhs_data(indicatorIds = "HA_CPHT_W_KNW", surveyYearStart = 2011, breakdown = "subnational")
+
+country = c("Cameroon", "Zambia")
+ggplot(
+  resp[resp$CountryName %in% country, ],
+  aes(
+    x = SurveyYear,
+    y = Value,
+    color = CountryName
+  )
+) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(y = "Households with Women who know Where to get an HIV test", color = "Country") +
+  facet_wrap(~CountryName)
+
+unique(data_76$Indicator)
+
+
+```
+Regions of women/men who know where to get a test have less hiv prevalence?
+```{r}
+# Cameroon
+cam_women = subset(data_76, data_76$Indicator == "Women who know where to get an HIV test" & data_76$CountryName == "Cameroon")
+colnames(cam_women)[5] = "Women who know where to get an HIV test"
+cam_prev = data_31[c(3, 5, 8)]
+colnames(cam_prev)[2] = "HIV prevalence among women"
+cam_combo = merge(cam_women, cam_prev, by = "RegionId")
+
+ggplot(data = cam_combo, aes(x = cam_combo$`Women who know where to get an HIV test`, y = cam_combo$`HIV prevalence among women`)) +
+  geom_point() +
+  geom_smooth(method = lm) +
+  stat_cor(label.y = 4000)+
+  ggtitle("Cameroon Women's Knowledge on Obtaining HIV Tests vs HIV Prevalence") +
+  xlab("Women who know where to get an HIV test") +
+  ylab("HIV prevalence among women")
+
+cam_men = subset(data_76, data_76$Indicator == "Men who know where to get an HIV test" & data_76$CountryName == "Cameroon")
+colnames(cam_men)[5] = "Men who know where to get an HIV test"
+cam_prev = data_31[c(3, 5, 8)]
+colnames(cam_prev)[2] = "HIV prevalence among men"
+cam_combo = merge(cam_men, cam_prev, by = "RegionId")
+
+ggplot(data = cam_combo, aes(x = cam_combo$`Men who know where to get an HIV test`, y = cam_combo$`HIV prevalence among men`)) +
+  geom_point() +
+  geom_smooth(method = lm) +
+  stat_cor(label.y = 4000)+
+  ggtitle("Cameroon Men's Knowledge on Obtaining HIV Tests vs HIV Prevalence") +
+  xlab("Men who know where to get an HIV test") +
+  ylab("HIV prevalence among men")
+
+
+# Zambia
+zam_women = subset(data_76, data_76$Indicator == "Women who know where to get an HIV test" & data_76$CountryName == "Zambia")
+colnames(zam_women)[5] = "Women who know where to get an HIV test"
+zam_prev = data_31[c(3, 5, 8)]
+colnames(zam_prev)[2] = "HIV prevalence among women"
+zam_combo = merge(zam_women, zam_prev, by = "RegionId")
+
+ggplot(data = zam_combo, aes(x = zam_combo$`Women who know where to get an HIV test`, y = zam_combo$`HIV prevalence among women`)) +
+  geom_point() +
+  geom_smooth(method = lm) +
+  stat_cor(label.y = 5000)+
+  ggtitle("Zambia Women's Knowledge on Obtaining HIV Tests vs HIV Prevalence") +
+  xlab("Women who know where to get an HIV test") +
+  ylab("HIV prevalence among women")
+
+zam_men = subset(data_76, data_76$Indicator == "Men who know where to get an HIV test" & data_76$CountryName == "Zambia")
+colnames(zam_men)[5] = "Men who know where to get an HIV test"
+zam_prev = data_31[c(3, 5, 8)]
+colnames(zam_prev)[2] = "HIV prevalence among men"
+zam_combo = merge(zam_men, zam_prev, by = "RegionId")
+
+ggplot(data = zam_combo, aes(x = zam_combo$`Men who know where to get an HIV test`, y = zam_combo$`HIV prevalence among men`)) +
+  geom_point() +
+  geom_smooth(method = lm) +
+  stat_cor(label.y = 5000)+
+  ggtitle("Zambia Men's Knowledge on Obtaining HIV Tests vs HIV Prevalence") +
+  xlab("Men who know where to get an HIV test") +
+  ylab("HIV prevalence among men")
+```
+
+
+
+```{r}
+data_31 = dhs_data(tagIds = 31, countryIds = c("CM","ZM"), breakdown = "subnational", surveyYearStart = 2011)
+# displaying the first 5 outputs for Zimbabwe and India in the year 2015 for HIV attitudes
+data_31 %>% datatable(options = list(
+  deferRender = TRUE,
+  scrollY = 350,
+  scrollX = 350,
+  dom = "t",
+  scroller = TRUE,
+  fixedColumns = list(leftColumns = 3, rightColumns = 0)
+))
+
+resp <- dhs_data(indicatorIds = "HA_HIVP_W_HIV", surveyYearStart = 2011, breakdown = "subnational")
+country = c("Cameroon", "Zambia")
+ggplot(
+  resp[resp$CountryName %in% country, ],
+  aes(
+    x = SurveyYear,
+    y = Value,
+    color = CountryName
+  )
+) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(y = "HIV Prevalence", color = "Country") +
+  facet_wrap(~CountryName)
+
+unique(data_31$Indicator)
+
+# Pie chart of HIV prevalence among men vs women between the countries
+# Cameroon
+cam_women_tot = subset(data_31, 
+                       data_31$SurveyYear == "2018" &
+                       data_31$CountryName == "Cameroon" & 
+                         data_31$Indicator == "Number of women interviewed and tested")
+cam_women_hiv = subset(data_31, 
+                       data_31$SurveyYear == "2018" &
+                       data_31$CountryName == "Cameroon" & 
+                       data_31$Indicator == "HIV prevalence among women")
+women = mean(cam_women_tot$Value)
+women_hiv = mean(cam_women_hiv$Value) * women
+women_neg = women - women_hiv
+
+cam_men_tot = subset(data_31, 
+                    data_31$SurveyYear == "2018" &
+                    data_31$CountryName == "Cameroon" &
+                    data_31$Indicator == "Number of men interviewed and tested")
+cam_men_hiv = subset(data_31, 
+                     data_31$SurveyYear == "2018" &
+                     data_31$CountryName == "Cameroon" & 
+                     data_31$Indicator == "HIV prevalence among men")
+men = mean(cam_men_tot$Value)
+men_hiv = mean(cam_men_hiv$Value) * men
+men_neg = men - men_hiv
+
+pie_chart_df = data.frame( Group = c("Women HIV+", "Women HIV-", "Men HIV+", "Men HIV-"), value = c(women_hiv, women_neg, men_hiv, men_neg))
+
+ggplot(pie_chart_df, aes(x="", y=value, fill=Group)) +
+  geom_bar(stat="identity", width=1, color="white") +
+  coord_polar("y", start=0) +
+  ggtitle("Proportion of HIV Positive Respondents in Cameroon in 2018") +
+  theme(legend.position = "bottom") +
+  theme_void()
+
+# Zambia
+zam_women_tot = subset(data_31, 
+                       data_31$SurveyYear == "2018" &
+                       data_31$CountryName == "Zambia" & 
+                       data_31$Indicator == "Number of women interviewed and tested")
+zam_women_hiv = subset(data_31, 
+                       data_31$SurveyYear == "2018" &
+                       data_31$CountryName == "Zambia" & 
+                       data_31$Indicator == "HIV prevalence among women")
+women = mean(zam_women_tot$Value)
+women_hiv = mean(zam_women_hiv$Value) * women
+women_neg = women - women_hiv
+
+zam_men_tot = subset(data_31, 
+                     data_31$SurveyYear == "2018" &
+                     data_31$CountryName == "Zambia" & 
+                     data_31$Indicator == "Number of men interviewed and tested")
+zam_men_hiv = subset(data_31, 
+                     data_31$SurveyYear == "2018" &
+                     data_31$CountryName == "Zambia" & 
+                     data_31$Indicator == "HIV prevalence among men")
+men = mean(zam_men_tot$Value)
+men_hiv = mean(zam_men_hiv$Value) * men
+men_neg = men - men_hiv
+
+pie_chart_df = data.frame( Group = c("Women HIV+", "Women HIV-", "Men HIV+", "Men HIV-"), value = c(women_hiv, women_neg, men_hiv, men_neg))
+
+ggplot(pie_chart_df, aes(x="", y=value, fill=Group)) +
+  geom_bar(stat="identity", width=1, color="white") +
+  coord_polar("y", start=0) +
+  ggtitle("Proportion of HIV Positive Respondents in Zambia in 2018") +
+  theme(legend.position = "bottom") +
+  theme_void()
+
+
+# Bar graph of HIV prevalence among general population, HIV prevalence among young women aged 15-24, HIV prevalence among young men aged 15-24, HIV prevalence among young people aged 15-24
+# Cameroon
+cam_gen = subset(data_31, data_31$CountryName == "Cameroon" & data_31$Indicator == "HIV prevalence among general population")
+cam_yw = subset(data_31, data_31$CountryName == "Cameroon" & data_31$Indicator == "HIV prevalence among young women aged 15-24")
+cam_ym = subset(data_31, data_31$CountryName == "Cameroon" & data_31$Indicator == "HIV prevalence among young men aged 15-24")
+cam_ya = subset(data_31, data_31$CountryName == "Cameroon" & data_31$Indicator == "HIV prevalence among young people aged 15-24")
+cgen = mean(cam_gen$Value)
+cyw = mean(cam_yw$Value)
+cym = mean(cam_ym$Value)
+cya = mean(cam_ya$Value)
+
+cam_bar = data.frame(Group = c("General Population", "Young Women Aged 15-24", "Young Men Aged 15-24", "Young People Aged 15-24"), Values = c(cgen, cyw, cym, cya))
+ggplot(cam_bar, aes(x = Group, y = Values, fill = Group)) +
+  geom_bar(stat = "identity") +
+  scale_x_discrete(breaks = NULL) +
+  ggtitle("HIV Prevalence For Various Demographics in Cameroon") +
+  theme(legend.position = "bottom") +
+  ylab("HIV Prevalence (%)")
+
+# Zambia
+zam_gen = subset(data_31, data_31$CountryName == "Zambia" & data_31$Indicator == "HIV prevalence among general population")
+zam_yw = subset(data_31, data_31$CountryName == "Zambia" & data_31$Indicator == "HIV prevalence among young women aged 15-24")
+zam_ym = subset(data_31, data_31$CountryName == "Zambia" & data_31$Indicator == "HIV prevalence among young men aged 15-24")
+zam_ya = subset(data_31, data_31$CountryName == "Zambia" & data_31$Indicator == "HIV prevalence among young people aged 15-24")
+zgen = mean(zam_gen$Value)
+zyw = mean(zam_yw$Value)
+zym = mean(zam_ym$Value)
+zya = mean(zam_ya$Value)
+
+zam_bar = data.frame(Group = c("General Population", "Young Women Aged 15-24", "Young Men Aged 15-24", "Young People Aged 15-24"), Values = c(zgen, zyw, zym, zya))
+ggplot(zam_bar, aes(x = Group, y = Values, fill = Group)) +
+  geom_bar(stat = "identity") +
+  scale_x_discrete(breaks = NULL) +
+  ggtitle("HIV Prevalence For Various Demographics in Zambia") +
+  theme(legend.position = "bottom") +
+  ylab("HIV Prevalence (%)")
+```
+
+```{r}
+data_29 = dhs_data(tagIds = 29, countryIds = c("CM","ZM"), breakdown = "subnational", surveyYearStart = 2011)
+# displaying the first 5 outputs for Zimbabwe and India in the year 2015 for HIV attitudes
+data_29 %>% datatable(options = list(
+  deferRender = TRUE,
+  scrollY = 350,
+  scrollX = 350,
+  dom = "t",
+  scroller = TRUE,
+  fixedColumns = list(leftColumns = 3, rightColumns = 0)
+))
+
+resp <- dhs_data(indicatorIds = "HA_HIVP_W_HIV", surveyYearStart = 2011, breakdown = "subnational")
+country = c("Cameroon", "Zambia")
+ggplot(
+  resp[resp$CountryName %in% country, ],
+  aes(
+    x = SurveyYear,
+    y = Value,
+    color = CountryName
+  )
+) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(y = "HIV Prevalence", color = "Country") +
+  facet_wrap(~CountryName)
+
+unique(data_29$Indicator)
+
+# Line plots of 
+
+
+```
+
+Creating new df for 29 (tldr it's wack)
+```{r}
+# Create a unique identifier for each row
+data_29$ID <- seq_len(nrow(data_29))
+
+# Pivot the "Factor" and "Value" columns to wide format
+wide_data <- data_29 %>%
+  select(ID, Indicator, Value) %>%
+  pivot_wider(names_from = Indicator, values_from = Value)
+
+# Remove the "ID" column
+wide_data <- wide_data %>% select(-ID)
+
+# Combine the pivoted data with the other columns
+result <- cbind(data_29 %>% select(-Indicator, -Value), wide_data)
+
+# Rename the columns if needed
+test = data_29[-c(3, 5)]
+colnames(result) <- c(colnames(test), unique(data_29$Indicator))
+
+# View the resulting data frame
+result
+```
+
+
+```{r}
+library(tidyr)
+library(dplyr)
+
+df <- data.frame(
+  Factor = c("A", "B", "A", "B", "A", "B"),
+  Value = c(1, 2, 3, 4, 5, 6),
+  OtherColumn1 = c("X", "Y", "X", "Y", "X", "Y"),
+  OtherColumn2 = c(10, 20, 30, 40, 50, 60)
+)
+
+# Create a unique identifier for each row
+df$ID <- seq_len(nrow(df))
+
+# Pivot the "Factor" and "Value" columns to wide format
+wide_data <- df %>%
+  select(ID, Factor, Value) %>%
+  pivot_wider(names_from = Factor, values_from = Value)
+
+# Remove the "ID" column
+wide_data <- wide_data %>% select(-ID)
+
+# Combine the pivoted data with the other columns
+result <- cbind(df %>% select(-Factor, -Value), wide_data)
+
+# Rename the columns if needed
+colnames(result) <- c("OtherColumn1", "OtherColumn2", "A", "B")
+
+# View the resulting data frame
+print(result)
+
+
+
+```
+
+
