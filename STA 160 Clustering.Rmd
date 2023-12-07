@@ -1,0 +1,50 @@
+---
+title: "STA 160 Clustering"
+author: "Enmian Chang"
+date: "2023-12-07"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# https://rspatialdata.github.io/dhs-data.html
+
+library("rdhs")
+library("tidyr")
+library("DT")
+library("ggpubr")
+library("tidyverse")
+library("tibble")
+library("ggplot2")
+library("factoextra")
+library("cluster")
+```
+
+```{r}
+df = read.csv("HIV.csv")
+df$CountryName = as.factor(df$CountryName)
+```
+
+https://www.statology.org/k-means-clustering-in-r/
+https://medium.com/codesmart/r-series-k-means-clustering-silhouette-794774b46586 < read more in these two articles
+```{r}
+HIV_prev = df[, c(3, 5)]
+
+# Finding optimal number of clusters using the silhouette method
+fviz_nbclust(HIV_prev, kmeans, method='silhouette') # shows two clusters optimal
+
+set.seed(2023)
+km = kmeans(HIV_prev, centers = 2, nstart = 25)
+fviz_cluster(km, data = HIV_prev)
+
+# To figure out what these two clusters are, we need additional graphs
+
+# Let's make a scatterplot of HIV Prevalence
+ggplot(df, aes(x = HIV.prevalence.among.men, y = HIV.prevalence.among.women, color = CountryName)) +
+  geom_point()
+# This shows us that the two clusters above were Zambia and Cameroon's different HIV prevalence
+```
+
